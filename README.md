@@ -1,92 +1,93 @@
 # Elco-Remocon.net-Home-Assistant-App
 
-Home Assistant add-on repository for reading data from an ELCO heat pump via ELCO Remocon.net and exposing that data as MQTT-discovered entities in Home Assistant.
+Home Assistant add-on repository for ELCO Remocon.net heat pump telemetry.
 
-## What The Add-on Does
+The add-on logs into ELCO Remocon.net, reads heating values from your plant dashboard, and publishes them as MQTT Discovery entities so they are visible in Home Assistant automatically.
 
-- Logs into your ELCO Remocon.net account
-- Opens your ELCO heat pump dashboard
-- Scrapes selected heating, hot water, maintenance, and heating-circuit values
-- Publishes those values to MQTT state topics
-- Publishes Home Assistant MQTT Discovery configs so entities/sensors appear automatically in Home Assistant
-- Repeats on an interval and only publishes changed values
+## Key Capabilities
 
-## Repository Structure
+- Reads data from ELCO Remocon.net dashboard pages that load dynamically
+- Publishes retained MQTT Discovery configs
+- Publishes retained MQTT state updates
+- Publishes only changed values during watch cycles
+- Supports strict metric allow-listing via `allowed_keys_csv`
 
-- `repository.yaml`: Home Assistant add-on repository metadata
+## Repository Layout
+
+- `repository.yaml`: repository metadata for Home Assistant Apps
 - `addons/remotethermo_heating_sync`: add-on package
 
-## Add to Home Assistant
+## Installation
 
 1. Open `Settings -> Apps`.
-2. Open the app store/repository management view.
-3. Add this repository URL:
+2. Open app store repository management.
+3. Add repository URL:
    - `https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App`
 4. Install:
    - `ELCO Remocon.net Heating MQTT Sync`
 
-## Required Add-on Options
+## Configuration
 
-- `dashboard_url`
-- `login_url`
-- `login_username`
-- `login_password`
-- `mqtt_url` (usually `mqtt://core-mosquitto:1883`)
-- `mqtt_username` / `mqtt_password` (if broker auth is enabled)
+### Required
 
-## All Add-on Options
+| Option | Description |
+|---|---|
+| `dashboard_url` | ELCO dashboard URL for your gateway (`.../BsbPlantDashboard/Index/<gateway_id>`) |
+| `login_url` | ELCO login entry URL |
+| `login_username` | ELCO account username/email |
+| `login_password` | ELCO account password |
+| `mqtt_url` | MQTT broker URL, usually `mqtt://core-mosquitto:1883` |
 
-- `dashboard_url`:
-  - ELCO Remocon.net dashboard URL for your gateway/device.
-  - Example: `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/<GATEWAY_ID>`
-- `login_url`:
-  - Login entry URL used before navigating to dashboard.
-  - Usually same domain as `dashboard_url`.
-- `login_username`:
-  - ELCO Remocon.net account username/email.
-- `login_password`:
-  - ELCO Remocon.net account password.
-- `scrape_max_wait_ms`:
-  - Max time to wait for dynamic page data each scrape cycle.
-  - Default: `90000`
-- `scrape_stable_passes`:
-  - Number of stable snapshot passes required before accepting data.
-  - Default: `4`
-- `scrape_poll_delay_ms`:
-  - Polling delay between snapshot checks.
-  - Default: `2000`
-- `watch_interval_ms`:
-  - Time between scrape/publish cycles.
-  - Default: `300000` (5 minutes)
-- `watch_error_backoff_ms`:
-  - Retry delay after a failed cycle.
-  - Default: `60000`
-- `mqtt_url`:
-  - MQTT broker URL.
-  - Typical Home Assistant value: `mqtt://core-mosquitto:1883`
-- `mqtt_username`:
-  - MQTT username (if broker auth is enabled).
-- `mqtt_password`:
-  - MQTT password (if broker auth is enabled).
-- `mqtt_discovery_prefix`:
-  - Home Assistant discovery prefix.
-  - Default: `homeassistant`
-- `mqtt_state_topic`:
-  - Base state topic prefix.
-  - Default: `elco_remocon/heating/state`
-- `ha_device_name`:
-  - Device name shown in Home Assistant.
-  - Default: `ELCO Remocon.net Heating`
-- `ha_device_id`:
-  - Stable device/entity ID prefix used for discovery unique IDs.
-  - Default: `elco_remocon_heating`
-- `allowed_keys_csv`:
-  - Comma-separated list of metric keys to publish.
-  - Use this to strictly control which entities appear in Home Assistant.
+### Optional
+
+| Option | Default | Description |
+|---|---:|---|
+| `mqtt_username` | `""` | MQTT username if broker auth is enabled |
+| `mqtt_password` | `""` | MQTT password if broker auth is enabled |
+| `mqtt_discovery_prefix` | `homeassistant` | Home Assistant MQTT discovery prefix |
+| `mqtt_state_topic` | `elco_remocon/heating/state` | Base state topic prefix |
+| `ha_device_name` | `ELCO Remocon.net Heating` | Device name in Home Assistant |
+| `ha_device_id` | `elco_remocon_heating` | Unique ID/device prefix |
+| `watch_interval_ms` | `300000` | Poll interval |
+| `watch_error_backoff_ms` | `60000` | Retry delay on failure |
+| `scrape_max_wait_ms` | `90000` | Max wait for dynamic dashboard data |
+| `scrape_stable_passes` | `4` | Number of stable passes required |
+| `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
+| `allowed_keys_csv` | curated key list | Comma-separated allow-list for published metrics |
+
+## Published Metrics
+
+Default allow-list includes:
+
+- `heating_active`
+- `gateway_serial`
+- `status`
+- `location`
+- `outside_temperature`
+- `hot_water_current_temperature`
+- `hot_water_comfort_temperature`
+- `hot_water_reduced_temperature`
+- `hot_water_operation_mode`
+- `maintenance_code_1`
+- `maintenance_code_2`
+- `maintenance_priority_1`
+- `maintenance_priority_2`
+- `heating_circuit_700_operating_mode`
+- `heating_circuit_710_comfort_setpoint`
+- `heating_circuit_712_reduced_setpoint`
+- `heating_circuit_714_frost_protection_setpoint`
+- `heating_circuit_720_heating_curve_slope`
+- `heating_circuit_730_summer_winter_heating_limit`
 
 ## Persistence
 
-The add-on persists state in:
+The add-on persists runtime data in `/data`:
 
 - `/data/playwright/.auth/remotethermo.json`
 - `/data/output/heating-metrics-YYYY-MM-DD.json`
+
+## Operational Notes
+
+- If dashboard sections are temporarily unavailable, core metrics still continue to publish.
+- `No metric changes (19 tracked)` in logs is expected behavior.
+- Restart during an active scrape can produce a browser-closed error once; this is not persistent failure.
