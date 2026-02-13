@@ -1,7 +1,7 @@
-name: "RemoteThermo Heating MQTT Sync"
-version: "1.0.2"
+name: "ELCO Remocon.net Heating MQTT Sync"
+version: "1.0.3"
 slug: "remotethermo_heating_sync"
-description: "Scrape RemoteThermo heating dashboard and publish Home Assistant MQTT discovery/state entities."
+description: "Scrape ELCO Remocon.net heating dashboard and publish Home Assistant MQTT discovery/state entities."
 url: "https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App"
 arch:
   - amd64
@@ -29,9 +29,9 @@ options:
   mqtt_username: ""
   mqtt_password: ""
   mqtt_discovery_prefix: "homeassistant"
-  mqtt_state_topic: "remotethermo/heating/state"
-  ha_device_name: "RemoteThermo Heating"
-  ha_device_id: "remotethermo_heating"
+  mqtt_state_topic: "elco_remocon/heating/state"
+  ha_device_name: "ELCO Remocon.net Heating"
+  ha_device_id: "elco_remocon_heating"
   allowed_keys_csv: "heating_active,gateway_serial,status,location,outside_temperature,hot_water_current_temperature,hot_water_comfort_temperature,hot_water_reduced_temperature,hot_water_operation_mode,maintenance_code_1,maintenance_code_2,maintenance_priority_1,maintenance_priority_2,heating_circuit_700_operating_mode,heating_circuit_710_comfort_setpoint,heating_circuit_712_reduced_setpoint,heating_circuit_714_frost_protection_setpoint,heating_circuit_720_heating_curve_slope,heating_circuit_730_summer_winter_heating_limit"
 schema:
   dashboard_url: str

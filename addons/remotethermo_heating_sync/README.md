@@ -1,6 +1,6 @@
-# RemoteThermo Heating MQTT Sync (Home Assistant Add-on)
+# ELCO Remocon.net Heating MQTT Sync
 
-This add-on runs the scraper in Home Assistant and publishes MQTT discovery/state topics.
+Home Assistant add-on that runs the scraper inside Home Assistant and publishes MQTT discovery/state topics.
 
 ## Required add-on options
 

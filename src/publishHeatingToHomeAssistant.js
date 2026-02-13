@@ -31,7 +31,7 @@ function buildDiscoveryConfig(metric) {
     device: {
       identifiers: [HA_DEVICE_ID],
       name: HA_DEVICE_NAME,
-      manufacturer: 'RemoteThermo',
+      manufacturer: 'ELCO',
       model: 'BsbPlantDashboard'
     }
   };

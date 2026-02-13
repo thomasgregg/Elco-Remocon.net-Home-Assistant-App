@@ -31,15 +31,15 @@ export const MQTT_URL = process.env.MQTT_URL || '';
 export const MQTT_USERNAME = process.env.MQTT_USERNAME || '';
 export const MQTT_PASSWORD = process.env.MQTT_PASSWORD || '';
 export const MQTT_DISCOVERY_PREFIX = process.env.MQTT_DISCOVERY_PREFIX || 'homeassistant';
-export const MQTT_STATE_TOPIC = process.env.MQTT_STATE_TOPIC || 'remotethermo/heating/state';
+export const MQTT_STATE_TOPIC = process.env.MQTT_STATE_TOPIC || 'elco_remocon/heating/state';
 export const WATCH_INTERVAL_MS = Number.parseInt(process.env.WATCH_INTERVAL_MS || '300000', 10);
 export const WATCH_ERROR_BACKOFF_MS = Number.parseInt(
   process.env.WATCH_ERROR_BACKOFF_MS || '60000',
   10
 );
 
-export const HA_DEVICE_NAME = process.env.HA_DEVICE_NAME || 'RemoteThermo Heating';
-export const HA_DEVICE_ID = process.env.HA_DEVICE_ID || 'remotethermo_heating';
+export const HA_DEVICE_NAME = process.env.HA_DEVICE_NAME || 'ELCO Remocon.net Heating';
+export const HA_DEVICE_ID = process.env.HA_DEVICE_ID || 'elco_remocon_heating';
 
 export const HEATING_LOGIN_USERNAME = process.env.HEATING_LOGIN_USERNAME || '';
 export const HEATING_LOGIN_PASSWORD = process.env.HEATING_LOGIN_PASSWORD || '';
