@@ -2,6 +2,15 @@
 
 Home Assistant add-on that runs the scraper inside Home Assistant and publishes MQTT discovery/state topics.
 
+Install via Home Assistant:
+
+1. Open `Settings -> Apps`.
+2. Open the app store/repository management view.
+3. Add repository:
+   - `https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App`
+4. Install:
+   - `ELCO Remocon.net Heating MQTT Sync`
+
 ## What It Does
 
 - Reads operational data from your ELCO heat pump via ELCO Remocon.net

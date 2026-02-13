@@ -18,10 +18,11 @@ Home Assistant add-on repository for reading data from an ELCO heat pump via ELC
 
 ## Add to Home Assistant
 
-1. Open `Settings -> Add-ons -> Add-on Store -> Repositories`.
-2. Add this repository URL:
+1. Open `Settings -> Apps`.
+2. Open the app store/repository management view.
+3. Add this repository URL:
    - `https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App`
-3. Install:
+4. Install:
    - `ELCO Remocon.net Heating MQTT Sync`
 
 ## Required Add-on Options
