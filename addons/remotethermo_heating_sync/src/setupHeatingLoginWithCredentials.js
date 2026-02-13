@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import {
   AUTH_DIR,
   BROWSER_CHANNEL,
+  HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_DASHBOARD_URL,
   HEATING_LOGIN_PASSWORD,
   HEATING_LOGIN_URL,
@@ -64,7 +65,11 @@ async function setupHeatingLoginWithCredentials() {
     headless: true,
     ignoreDefaultArgs: ['--enable-automation']
   };
-  if (BROWSER_CHANNEL) launchOptions.channel = BROWSER_CHANNEL;
+  if (HEATING_BROWSER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = HEATING_BROWSER_EXECUTABLE_PATH;
+  } else if (BROWSER_CHANNEL) {
+    launchOptions.channel = BROWSER_CHANNEL;
+  }
 
   const browser = await chromium.launch(launchOptions);
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });

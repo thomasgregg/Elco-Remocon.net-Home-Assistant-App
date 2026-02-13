@@ -3,9 +3,16 @@ FROM ${BUILD_FROM}
 
 WORKDIR /app
 
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends jq \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+  bash \
+  nodejs \
+  npm \
+  chromium \
+  nss \
+  freetype \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev

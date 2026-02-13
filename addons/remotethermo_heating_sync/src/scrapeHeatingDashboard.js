@@ -5,6 +5,7 @@ import { chromium } from 'playwright';
 import {
   BROWSER_CHANNEL,
   AUTH_DIR,
+  HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_DASHBOARD_URL,
   HEATING_STORAGE_STATE_PATH,
   OUTPUT_DIR,
@@ -303,7 +304,11 @@ function launchOptions(headless) {
     headless,
     ignoreDefaultArgs: ['--enable-automation']
   };
-  if (BROWSER_CHANNEL) options.channel = BROWSER_CHANNEL;
+  if (HEATING_BROWSER_EXECUTABLE_PATH) {
+    options.executablePath = HEATING_BROWSER_EXECUTABLE_PATH;
+  } else if (BROWSER_CHANNEL) {
+    options.channel = BROWSER_CHANNEL;
+  }
   return options;
 }
 

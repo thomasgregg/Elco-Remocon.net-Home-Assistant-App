@@ -2,7 +2,7 @@ name: "RemoteThermo Heating MQTT Sync"
 version: "1.0.0"
 slug: "remotethermo_heating_sync"
 description: "Scrape RemoteThermo heating dashboard and publish Home Assistant MQTT discovery/state entities."
-url: "https://github.com/thomasgregg/remotethermo-home-assistant-sync"
+url: "https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App"
 arch:
   - amd64
   - aarch64
@@ -20,7 +20,7 @@ options:
   login_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
   login_username: ""
   login_password: ""
-  browser_channel: "chromium"
+  browser_channel: ""
   scrape_max_wait_ms: 90000
   scrape_stable_passes: 4
   scrape_poll_delay_ms: 2000

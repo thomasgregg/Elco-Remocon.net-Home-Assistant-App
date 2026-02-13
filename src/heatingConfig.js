@@ -19,6 +19,7 @@ export const HEATING_STORAGE_STATE_PATH =
   process.env.HEATING_STORAGE_STATE_PATH || path.join(AUTH_DIR, 'remotethermo.json');
 
 export const BROWSER_CHANNEL = process.env.BROWSER_CHANNEL || 'chrome';
+export const HEATING_BROWSER_EXECUTABLE_PATH = process.env.HEATING_BROWSER_EXECUTABLE_PATH || '';
 
 export const SCRAPE_MAX_WAIT_MS = Number.parseInt(process.env.SCRAPE_MAX_WAIT_MS || '90000', 10);
 export const SCRAPE_STABLE_PASSES = Number.parseInt(process.env.SCRAPE_STABLE_PASSES || '4', 10);
