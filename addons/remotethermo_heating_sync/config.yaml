@@ -1,5 +1,5 @@
 name: "RemoteThermo Heating MQTT Sync"
-version: "1.0.0"
+version: "1.0.1"
 slug: "remotethermo_heating_sync"
 description: "Scrape RemoteThermo heating dashboard and publish Home Assistant MQTT discovery/state entities."
 url: "https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App"
@@ -10,12 +10,15 @@ init: false
 startup: services
 boot: auto
 host_network: false
-ingress: false
+ingress: true
+ingress_port: 6080
+panel_admin: false
 panel_icon: mdi:radiator
 environment:
   HEATING_DATA_DIR: /data
   HEATING_DISABLE_CDP_REFRESH: "1"
 options:
+  auth_mode: "auto_credentials"
   dashboard_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
   login_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
   login_username: ""
@@ -35,6 +38,7 @@ options:
   ha_device_id: "remotethermo_heating"
   allowed_keys_csv: "heating_active,gateway_serial,status,location,outside_temperature,hot_water_current_temperature,hot_water_comfort_temperature,hot_water_reduced_temperature,hot_water_operation_mode,maintenance_code_1,maintenance_code_2,maintenance_priority_1,maintenance_priority_2,heating_circuit_700_operating_mode,heating_circuit_710_comfort_setpoint,heating_circuit_712_reduced_setpoint,heating_circuit_714_frost_protection_setpoint,heating_circuit_720_heating_curve_slope,heating_circuit_730_summer_winter_heating_limit"
 schema:
+  auth_mode: list(auto_credentials|interactive_bootstrap)
   dashboard_url: str
   login_url: str
   login_username: str?

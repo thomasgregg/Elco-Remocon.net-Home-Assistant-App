@@ -6,6 +6,7 @@
   "scripts": {
     "setup:heating:login": "node src/setupHeatingLogin.js",
     "setup:heating:login:auto": "node src/setupHeatingLoginWithCredentials.js",
+    "setup:heating:login:interactive": "node src/setupHeatingLoginInteractive.js",
     "setup:heating:session": "node src/setupHeatingSessionFromChrome.js",
     "scrape:heating": "node src/scrapeHeatingDashboard.js",
     "cleanup:heating:mqtt": "node src/cleanupHeatingMqtt.js",

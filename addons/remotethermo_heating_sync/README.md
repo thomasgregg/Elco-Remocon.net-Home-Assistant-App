@@ -19,6 +19,15 @@ The add-on will create and reuse session state at:
 
 - `/data/playwright/.auth/remotethermo.json`
 
+## Auth Modes
+
+- `auto_credentials`:
+  - Uses `login_username` + `login_password` headlessly.
+- `interactive_bootstrap`:
+  - Starts noVNC over add-on Ingress.
+  - Open add-on UI and complete login in the shown browser.
+  - Session is saved automatically, then watcher starts.
+
 ## Notes
 
 - The add-on publishes only keys listed in `allowed_keys_csv`.
