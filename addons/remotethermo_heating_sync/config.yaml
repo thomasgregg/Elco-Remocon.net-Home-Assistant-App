@@ -1,0 +1,55 @@
+name: "RemoteThermo Heating MQTT Sync"
+version: "1.0.0"
+slug: "remotethermo_heating_sync"
+description: "Scrape RemoteThermo heating dashboard and publish Home Assistant MQTT discovery/state entities."
+url: "https://github.com/thomasgregg/remotethermo-home-assistant-sync"
+arch:
+  - amd64
+  - aarch64
+init: false
+startup: services
+boot: auto
+host_network: false
+ingress: false
+panel_icon: mdi:radiator
+environment:
+  HEATING_DATA_DIR: /data
+  HEATING_DISABLE_CDP_REFRESH: "1"
+options:
+  dashboard_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
+  login_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
+  login_username: ""
+  login_password: ""
+  browser_channel: "chromium"
+  scrape_max_wait_ms: 90000
+  scrape_stable_passes: 4
+  scrape_poll_delay_ms: 2000
+  watch_interval_ms: 300000
+  watch_error_backoff_ms: 60000
+  mqtt_url: "mqtt://core-mosquitto:1883"
+  mqtt_username: ""
+  mqtt_password: ""
+  mqtt_discovery_prefix: "homeassistant"
+  mqtt_state_topic: "remotethermo/heating/state"
+  ha_device_name: "RemoteThermo Heating"
+  ha_device_id: "remotethermo_heating"
+  allowed_keys_csv: "heating_active,gateway_serial,status,location,outside_temperature,hot_water_current_temperature,hot_water_comfort_temperature,hot_water_reduced_temperature,hot_water_operation_mode,maintenance_code_1,maintenance_code_2,maintenance_priority_1,maintenance_priority_2,heating_circuit_700_operating_mode,heating_circuit_710_comfort_setpoint,heating_circuit_712_reduced_setpoint,heating_circuit_714_frost_protection_setpoint,heating_circuit_720_heating_curve_slope,heating_circuit_730_summer_winter_heating_limit"
+schema:
+  dashboard_url: str
+  login_url: str
+  login_username: str?
+  login_password: password?
+  browser_channel: str
+  scrape_max_wait_ms: int
+  scrape_stable_passes: int
+  scrape_poll_delay_ms: int
+  watch_interval_ms: int
+  watch_error_backoff_ms: int
+  mqtt_url: str
+  mqtt_username: str?
+  mqtt_password: password?
+  mqtt_discovery_prefix: str
+  mqtt_state_topic: str
+  ha_device_name: str
+  ha_device_id: str
+  allowed_keys_csv: str?

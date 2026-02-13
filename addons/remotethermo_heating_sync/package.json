@@ -1,0 +1,20 @@
+{
+  "name": "remotethermo-home-assistant-sync",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup:heating:login": "node src/setupHeatingLogin.js",
+    "setup:heating:login:auto": "node src/setupHeatingLoginWithCredentials.js",
+    "setup:heating:session": "node src/setupHeatingSessionFromChrome.js",
+    "scrape:heating": "node src/scrapeHeatingDashboard.js",
+    "cleanup:heating:mqtt": "node src/cleanupHeatingMqtt.js",
+    "sync:heating": "node src/heatingSync.js",
+    "watch:heating": "node src/watchHeating.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mqtt": "^5.14.1",
+    "playwright": "^1.54.0"
+  }
+}
