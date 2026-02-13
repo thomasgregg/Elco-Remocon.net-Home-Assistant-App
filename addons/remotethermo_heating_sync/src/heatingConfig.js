@@ -18,7 +18,6 @@ export const HEATING_LOGIN_URL = process.env.HEATING_LOGIN_URL || HEATING_DASHBO
 export const HEATING_STORAGE_STATE_PATH =
   process.env.HEATING_STORAGE_STATE_PATH || path.join(AUTH_DIR, 'remotethermo.json');
 
-export const BROWSER_CHANNEL = process.env.BROWSER_CHANNEL || 'chrome';
 export const HEATING_BROWSER_EXECUTABLE_PATH = process.env.HEATING_BROWSER_EXECUTABLE_PATH || '';
 
 export const SCRAPE_MAX_WAIT_MS = Number.parseInt(process.env.SCRAPE_MAX_WAIT_MS || '90000', 10);

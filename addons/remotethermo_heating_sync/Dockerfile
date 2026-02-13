@@ -8,10 +8,6 @@ RUN apk add --no-cache \
   nodejs \
   npm \
   chromium \
-  xvfb \
-  x11vnc \
-  novnc \
-  websockify \
   nss \
   freetype \
   harfbuzz \

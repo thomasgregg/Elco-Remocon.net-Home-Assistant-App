@@ -3,7 +3,6 @@ import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import {
   AUTH_DIR,
-  BROWSER_CHANNEL,
   HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_LOGIN_URL,
   HEATING_STORAGE_STATE_PATH,
@@ -20,8 +19,6 @@ async function main() {
   };
   if (HEATING_BROWSER_EXECUTABLE_PATH) {
     launchOptions.executablePath = HEATING_BROWSER_EXECUTABLE_PATH;
-  } else if (BROWSER_CHANNEL) {
-    launchOptions.channel = BROWSER_CHANNEL;
   }
 
   const browser = await chromium.launch(launchOptions);

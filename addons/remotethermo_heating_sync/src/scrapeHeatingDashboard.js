@@ -3,7 +3,6 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import {
-  BROWSER_CHANNEL,
   AUTH_DIR,
   HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_DASHBOARD_URL,
@@ -306,8 +305,6 @@ function launchOptions(headless) {
   };
   if (HEATING_BROWSER_EXECUTABLE_PATH) {
     options.executablePath = HEATING_BROWSER_EXECUTABLE_PATH;
-  } else if (BROWSER_CHANNEL) {
-    options.channel = BROWSER_CHANNEL;
   }
   return options;
 }
