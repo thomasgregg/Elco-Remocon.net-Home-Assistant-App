@@ -39,7 +39,7 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 
 | Option | Description |
 |---|---|
-| `dashboard_url` | ELCO dashboard URL for your gateway (`.../BsbPlantDashboard/Index/<gateway_id>`) |
+| `dashboard_url` | ELCO dashboard URL for your gateway. Format: `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/<gateway_id>` |
 | `login_url` | ELCO login entry URL. Default: `https://www.remocon-net.remotethermo.com/R2/Account/Login` |
 | `login_username` | ELCO account username/email |
 | `login_password` | ELCO account password |
