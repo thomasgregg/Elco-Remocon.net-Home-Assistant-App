@@ -22,7 +22,7 @@ Home Assistant app that reads ELCO Remocon.net heat pump telemetry and exposes i
 
 Example dashboard using entities published by this app:
 
-![ELCO Remocon.net in Home Assistant](../../docs/images/home-assistant-dashboard.png)
+![ELCO Remocon.net in Home Assistant](./home-assistant-dashboard.png)
 
 ## Configuration
 
