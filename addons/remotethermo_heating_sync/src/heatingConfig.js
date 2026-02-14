@@ -11,9 +11,10 @@ export const OUTPUT_DIR = path.join(DATA_DIR, 'output');
 
 export const HEATING_DASHBOARD_URL =
   process.env.HEATING_DASHBOARD_URL ||
-  'https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60';
+  'https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/';
 
-export const HEATING_LOGIN_URL = process.env.HEATING_LOGIN_URL || HEATING_DASHBOARD_URL;
+export const HEATING_LOGIN_URL =
+  process.env.HEATING_LOGIN_URL || 'https://www.remocon-net.remotethermo.com/R2/Account/Login';
 
 export const HEATING_STORAGE_STATE_PATH =
   process.env.HEATING_STORAGE_STATE_PATH || path.join(AUTH_DIR, 'remotethermo.json');

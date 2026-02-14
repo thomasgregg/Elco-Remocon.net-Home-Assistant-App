@@ -16,8 +16,8 @@ environment:
   HEATING_DATA_DIR: /data
   HEATING_DISABLE_CDP_REFRESH: "1"
 options:
-  dashboard_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
-  login_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60"
+  dashboard_url: "https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/"
+  login_url: "https://www.remocon-net.remotethermo.com/R2/Account/Login"
   login_username: ""
   login_password: ""
   scrape_max_wait_ms: 90000
