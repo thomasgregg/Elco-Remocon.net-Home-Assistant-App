@@ -68,7 +68,7 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 2. Open your plant dashboard.
 3. Copy the last path segment of the URL after `/BsbPlantDashboard/Index/`.
 4. Use it in `dashboard_url`, for example:
-   - `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60`
+   - `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/YOUR_GATEWAY_ID`
 
 ## Published Metrics
 
