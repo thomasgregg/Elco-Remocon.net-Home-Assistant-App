@@ -62,6 +62,14 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 | `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
 | `allowed_keys_csv` | curated key list | Comma-separated allow-list for published metrics |
 
+### How to find `<gateway_id>`
+
+1. Log in to ELCO Remocon.net in your browser.
+2. Open your plant dashboard.
+3. Copy the last path segment of the URL after `/BsbPlantDashboard/Index/`.
+4. Use it in `dashboard_url`, for example:
+   - `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/F0AD4E0B7C60`
+
 ## Published Metrics
 
 Default allow-list includes:
