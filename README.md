@@ -26,6 +26,13 @@ The add-on logs into ELCO Remocon.net, reads heating values from your plant dash
 4. Install:
    - `ELCO Remocon.net Heating MQTT Sync`
 
+## Home Assistant Example
+
+The screenshot below shows a typical Home Assistant dashboard using entities published by this app.  
+It combines status indicators, hot water temperatures, maintenance diagnostics, and heating-circuit setpoints in one view.
+
+![ELCO Remocon.net in Home Assistant](docs/images/home-assistant-dashboard.png)
+
 ## Configuration
 
 ### Required
