@@ -1,6 +1,6 @@
 # ELCO Remocon.net Heating MQTT Sync
 
-Home Assistant add-on that runs the scraper inside Home Assistant and publishes MQTT discovery/state topics.
+Home Assistant app that reads ELCO Remocon.net heat pump telemetry and exposes it as MQTT Discovery entities in Home Assistant.
 
 ## Install
 
@@ -13,10 +13,16 @@ Home Assistant add-on that runs the scraper inside Home Assistant and publishes 
 
 ## What It Does
 
-- Reads telemetry from ELCO Remocon.net for your heat pump
-- Publishes retained MQTT discovery configs
-- Publishes retained MQTT state values
+- Logs into ELCO Remocon.net and opens your plant dashboard
+- Scrapes heating, hot water, maintenance, and heating-circuit values
+- Publishes retained MQTT discovery configs and retained state topics
 - Publishes only changed values during watch cycles
+
+## Home Assistant Example
+
+Example dashboard using entities published by this app:
+
+![ELCO Remocon.net in Home Assistant](../../docs/images/home-assistant-dashboard.png)
 
 ## Configuration
 
@@ -58,3 +64,4 @@ The add-on creates and reuses session/runtime state at:
 
 - The add-on publishes only keys listed in `allowed_keys_csv`.
 - If session expires, auto-login is retried using configured credentials.
+- If a dashboard section is temporarily unavailable, the next cycle usually recovers automatically.
