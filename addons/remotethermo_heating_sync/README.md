@@ -1,28 +1,37 @@
-# ELCO Remocon.net Heating MQTT Sync
+# Elco-Remocon.net-Home-Assistant-App
 
-Home Assistant app that reads ELCO Remocon.net heat pump telemetry and exposes it as MQTT Discovery entities in Home Assistant.
+Home Assistant add-on repository for ELCO Remocon.net heat pump telemetry.
 
-## Install
+The add-on logs into ELCO Remocon.net, reads heating values from your plant dashboard, and publishes them as MQTT Discovery entities so they are visible in Home Assistant automatically.
+
+## Key Capabilities
+
+- Reads data from ELCO Remocon.net dashboard pages that load dynamically
+- Publishes retained MQTT Discovery configs
+- Publishes retained MQTT state updates
+- Publishes only changed values during watch cycles
+- Supports strict metric allow-listing via `allowed_keys_csv`
+
+## Repository Layout
+
+- `repository.yaml`: repository metadata for Home Assistant Apps
+- `addons/remotethermo_heating_sync`: add-on package
+
+## Installation
 
 1. Open `Settings -> Apps`.
-2. Open the app store/repository management view.
-3. Add repository:
+2. Open app store repository management.
+3. Add repository URL:
    - `https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App`
 4. Install:
    - `ELCO Remocon.net Heating MQTT Sync`
 
-## What It Does
-
-- Logs into ELCO Remocon.net and opens your plant dashboard
-- Scrapes heating, hot water, maintenance, and heating-circuit values
-- Publishes retained MQTT discovery configs and retained state topics
-- Publishes only changed values during watch cycles
-
 ## Home Assistant Example
 
-Example dashboard using entities published by this app:
+The screenshot below shows a typical Home Assistant dashboard using entities published by this app.  
+It combines status indicators, hot water temperatures, maintenance diagnostics, and heating-circuit setpoints in one view.
 
-![ELCO Remocon.net in Home Assistant](./home-assistant-dashboard.png)
+![ELCO Remocon.net in Home Assistant](https://raw.githubusercontent.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App/main/docs/images/home-assistant-dashboard.png)
 
 ## Configuration
 
@@ -30,8 +39,8 @@ Example dashboard using entities published by this app:
 
 | Option | Description |
 |---|---|
-| `dashboard_url` | Dashboard URL for your gateway (`.../BsbPlantDashboard/Index/<gateway_id>`) |
-| `login_url` | Login entry URL |
+| `dashboard_url` | ELCO dashboard URL for your gateway (`.../BsbPlantDashboard/Index/<gateway_id>`) |
+| `login_url` | ELCO login entry URL |
 | `login_username` | ELCO account username/email |
 | `login_password` | ELCO account password |
 | `mqtt_url` | MQTT broker URL, usually `mqtt://core-mosquitto:1883` |
@@ -40,28 +49,52 @@ Example dashboard using entities published by this app:
 
 | Option | Default | Description |
 |---|---:|---|
-| `mqtt_username` | `""` | MQTT username |
-| `mqtt_password` | `""` | MQTT password |
-| `mqtt_discovery_prefix` | `homeassistant` | MQTT discovery prefix |
-| `mqtt_state_topic` | `elco_remocon/heating/state` | Base state topic |
+| `mqtt_username` | `""` | MQTT username if broker auth is enabled |
+| `mqtt_password` | `""` | MQTT password if broker auth is enabled |
+| `mqtt_discovery_prefix` | `homeassistant` | Home Assistant MQTT discovery prefix |
+| `mqtt_state_topic` | `elco_remocon/heating/state` | Base state topic prefix |
 | `ha_device_name` | `ELCO Remocon.net Heating` | Device name in Home Assistant |
-| `ha_device_id` | `elco_remocon_heating` | Device/unique ID prefix |
+| `ha_device_id` | `elco_remocon_heating` | Unique ID/device prefix |
 | `watch_interval_ms` | `300000` | Poll interval |
-| `watch_error_backoff_ms` | `60000` | Retry delay on scrape error |
-| `scrape_max_wait_ms` | `90000` | Max wait for dynamic data |
-| `scrape_stable_passes` | `4` | Number of stable passes |
-| `scrape_poll_delay_ms` | `2000` | Poll delay while stabilizing |
-| `allowed_keys_csv` | curated key list | Comma-separated allow-list of metric keys to publish |
+| `watch_error_backoff_ms` | `60000` | Retry delay on failure |
+| `scrape_max_wait_ms` | `90000` | Max wait for dynamic dashboard data |
+| `scrape_stable_passes` | `4` | Number of stable passes required |
+| `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
+| `allowed_keys_csv` | curated key list | Comma-separated allow-list for published metrics |
+
+## Published Metrics
+
+Default allow-list includes:
+
+- `heating_active`
+- `gateway_serial`
+- `status`
+- `location`
+- `outside_temperature`
+- `hot_water_current_temperature`
+- `hot_water_comfort_temperature`
+- `hot_water_reduced_temperature`
+- `hot_water_operation_mode`
+- `maintenance_code_1`
+- `maintenance_code_2`
+- `maintenance_priority_1`
+- `maintenance_priority_2`
+- `heating_circuit_700_operating_mode`
+- `heating_circuit_710_comfort_setpoint`
+- `heating_circuit_712_reduced_setpoint`
+- `heating_circuit_714_frost_protection_setpoint`
+- `heating_circuit_720_heating_curve_slope`
+- `heating_circuit_730_summer_winter_heating_limit`
 
 ## Persistence
 
-The add-on creates and reuses session/runtime state at:
+The add-on persists runtime data in `/data`:
 
 - `/data/playwright/.auth/remotethermo.json`
 - `/data/output/heating-metrics-YYYY-MM-DD.json`
 
-## Notes
+## Operational Notes
 
-- The add-on publishes only keys listed in `allowed_keys_csv`.
-- If session expires, auto-login is retried using configured credentials.
-- If a dashboard section is temporarily unavailable, the next cycle usually recovers automatically.
+- If dashboard sections are temporarily unavailable, core metrics still continue to publish.
+- `No metric changes (19 tracked)` in logs is expected behavior.
+- Restart during an active scrape can produce a browser-closed error once; this is not persistent failure.
