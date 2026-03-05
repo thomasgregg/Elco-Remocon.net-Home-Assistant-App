@@ -279,7 +279,7 @@ async function refreshAuthStateFromChromeCdp() {
 
     const context = contexts[0];
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1500);
 
     ensureDir(AUTH_DIR);
@@ -1045,7 +1045,7 @@ async function tryScrapeFromLiveChromeCdp() {
     const context = browser.contexts()[0] || (await browser.newContext());
     const page = context.pages()[0] || (await context.newPage());
 
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2500);
     await forceOpenHotWater(page);
 
@@ -1134,7 +1134,7 @@ async function scrapeHeating() {
   let context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
   let page = await context.newPage();
 
-  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
+  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForTimeout(2500);
 
   let pageUrl = page.url();
@@ -1156,7 +1156,7 @@ async function scrapeHeating() {
     browser = retryBrowser;
     context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
     page = await context.newPage();
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2500);
     pageUrl = page.url();
     if (/login|signin|account/i.test(pageUrl) && !pageUrl.includes('/BsbPlantDashboard/')) {

@@ -11,6 +11,10 @@ import { scrapeHeating } from './scrapeHeatingDashboard.js';
 import { publishHeatingToHomeAssistant } from './publishHeatingToHomeAssistant.js';
 
 const LAST_STATE_FILE = path.join(OUTPUT_DIR, 'heating-last-published-state.json');
+const MAX_CONSECUTIVE_FAILURES = Number.parseInt(
+  process.env.WATCH_MAX_CONSECUTIVE_FAILURES || '15',
+  10
+);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -92,14 +96,28 @@ async function main() {
   );
 
   let snapshot = loadLastSnapshot();
+  let consecutiveFailures = 0;
 
   while (true) {
     try {
       snapshot = await runOnce(snapshot);
       saveSnapshot(snapshot);
+      consecutiveFailures = 0;
       await sleep(WATCH_INTERVAL_MS);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Watch iteration failed:`, error);
+      consecutiveFailures += 1;
+      console.error(
+        `[${new Date().toISOString()}] Watch iteration failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES}):`,
+        error
+      );
+
+      if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+        console.error(
+          `[${new Date().toISOString()}] Too many consecutive failures; exiting so Home Assistant can restart the app cleanly.`
+        );
+        process.exit(1);
+      }
+
       await sleep(WATCH_ERROR_BACKOFF_MS);
     }
   }
