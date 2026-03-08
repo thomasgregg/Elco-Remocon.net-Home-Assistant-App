@@ -4,9 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import {
   AUTH_DIR,
-  HEATING_BROWSER_EXECUTABLE_PATH,
-  HEATING_PUBLISH_ALL_METRICS,
-  HEATING_DASHBOARD_URL,
+  HEATING_BROWSER_EXECUTABLE_PATH,  HEATING_DASHBOARD_URL,
   HEATING_STORAGE_STATE_PATH,
   OUTPUT_DIR,
   SCRAPE_MAX_WAIT_MS,
@@ -349,46 +347,6 @@ function saveLastGoodHotWater(metrics) {
   );
 }
 
-function rawKeyFromLabel(label) {
-  const base = clean(label)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-  if (!base) return 'raw_metric';
-  if (/^\d/.test(base)) return `raw_metric_${base}`;
-  return `raw_${base}`;
-}
-
-function appendAllRawMetrics(selected, rawMetrics) {
-  const used = new Set(selected.map((m) => m.key));
-
-  for (const item of rawMetrics) {
-    const label = clean(item.label);
-    const value = clean(item.value);
-    if (!label || !value) continue;
-
-    let key = rawKeyFromLabel(label);
-    let n = 2;
-    while (used.has(key)) {
-      key = `${rawKeyFromLabel(label)}_${n}`;
-      n += 1;
-    }
-
-    used.add(key);
-    const numberValue = toNumber(value);
-    const unit = /°\s*C/i.test(value) ? '°C' : /%/.test(value) ? '%' : null;
-
-    selected.push({
-      key,
-      label: `Raw: ${label}`,
-      value,
-      numberValue,
-      unit
-    });
-  }
-}
-
 function buildSelectedMetrics(snapshot, vmHotWater) {
   const rawMetrics = [];
   for (const pair of snapshot.values) {
@@ -411,11 +369,7 @@ function buildSelectedMetrics(snapshot, vmHotWater) {
     rawMetrics.push({ label: 'Operation mode', value: vmHotWater.mode });
   }
 
-  const selected = canonicalMetrics(rawMetrics, snapshot.textBlob);
-  if (HEATING_PUBLISH_ALL_METRICS) {
-    appendAllRawMetrics(selected, rawMetrics);
-  }
-  return { rawMetrics, selected };
+  return { rawMetrics, selected: canonicalMetrics(rawMetrics, snapshot.textBlob) };
 }
 
 async function collectPairsFromFrame(frame) {
