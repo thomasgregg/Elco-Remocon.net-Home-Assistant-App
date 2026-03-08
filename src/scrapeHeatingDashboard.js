@@ -4,7 +4,8 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 import {
   AUTH_DIR,
-  HEATING_BROWSER_EXECUTABLE_PATH,  HEATING_DASHBOARD_URL,
+  HEATING_BROWSER_EXECUTABLE_PATH,
+  HEATING_DASHBOARD_URL,
   HEATING_STORAGE_STATE_PATH,
   OUTPUT_DIR,
   SCRAPE_MAX_WAIT_MS,
@@ -16,19 +17,6 @@ import {
 import { setupHeatingLoginWithCredentials } from './setupHeatingLoginWithCredentials.js';
 
 const DEBUG_RAW = process.env.HEATING_DEBUG_RAW === '1';
-
-const EXPECTED_DETAILED_KEYS = [
-  'maintenance_code_1',
-  'maintenance_code_2',
-  'maintenance_priority_1',
-  'maintenance_priority_2',
-  'heating_circuit_700_operating_mode',
-  'heating_circuit_710_comfort_setpoint',
-  'heating_circuit_712_reduced_setpoint',
-  'heating_circuit_714_frost_protection_setpoint',
-  'heating_circuit_720_heating_curve_slope',
-  'heating_circuit_730_summer_winter_heating_limit'
-];
 
 function clean(text) {
   return String(text || '')
@@ -243,11 +231,6 @@ function hotWaterLooksValid(metrics) {
   );
 }
 
-function missingDetailedKeys(selected) {
-  const present = new Set((selected || []).map((m) => m.key));
-  return EXPECTED_DETAILED_KEYS.filter((key) => !present.has(key));
-}
-
 function upsertMetric(metrics, metric) {
   const idx = metrics.findIndex((m) => m.key === metric.key);
   if (idx >= 0) metrics[idx] = metric;
@@ -296,7 +279,7 @@ async function refreshAuthStateFromChromeCdp() {
 
     const context = contexts[0];
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1500);
 
     ensureDir(AUTH_DIR);
@@ -871,7 +854,7 @@ async function extractMaintenanceMetrics(page) {
     // Values are populated asynchronously; wait for at least one non-empty field.
     const started = Date.now();
     let values = {};
-    while (Date.now() - started < 20000) {
+    while (Date.now() - started < 12000) {
       values = await readMaintenanceFieldsFromFrames(page);
       if (
         values.maintenance_code_1 ||
@@ -1062,7 +1045,7 @@ async function tryScrapeFromLiveChromeCdp() {
     const context = browser.contexts()[0] || (await browser.newContext());
     const page = context.pages()[0] || (await context.newPage());
 
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2500);
     await forceOpenHotWater(page);
 
@@ -1151,7 +1134,7 @@ async function scrapeHeating() {
   let context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
   let page = await context.newPage();
 
-  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2500);
 
   let pageUrl = page.url();
@@ -1173,7 +1156,7 @@ async function scrapeHeating() {
     browser = retryBrowser;
     context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
     page = await context.newPage();
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2500);
     pageUrl = page.url();
     if (/login|signin|account/i.test(pageUrl) && !pageUrl.includes('/BsbPlantDashboard/')) {
@@ -1197,21 +1180,6 @@ async function scrapeHeating() {
   let snapshot = await waitForStableData(page);
   let vmData = vmHotWater;
   let { rawMetrics, selected } = buildSelectedMetrics(snapshot, vmData);
-
-  // Fallback: if we only got top header metrics, switch to R2 PlantDashboard URL and re-snapshot.
-  if (selected.length <= 3 && gatewayId) {
-    const r2DashboardUrl = `https://www.remocon-net.remotethermo.com/R2/Plant/Index/${gatewayId}?navMenuItem=PlantDashboard&breadcrumbPath=PlantFromSearch`;
-    try {
-      await page.goto(r2DashboardUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await page.waitForTimeout(2500);
-      await forceOpenHotWater(page);
-      vmData = (await extractHotWaterFromViewModel(page)) || vmData;
-      snapshot = await waitForStableData(page);
-      ({ rawMetrics, selected } = buildSelectedMetrics(snapshot, vmData));
-    } catch {
-      // keep original snapshot
-    }
-  }
 
   // Auto-recovery: if hot-water values are missing/default, click Refresh and retry.
   for (let attempt = 0; attempt < 3 && !hotWaterLooksValid(selected); attempt += 1) {
@@ -1313,33 +1281,6 @@ async function scrapeHeating() {
   const heatingCircuitMetrics = await extractHeatingCircuitMetrics(page);
   for (const metric of heatingCircuitMetrics) {
     upsertMetric(selected, metric);
-  }
-
-  // Recovery path: if detailed keys are missing, retry section extraction once after a short pause.
-  let missing = missingDetailedKeys(selected);
-  if (missing.length > 0) {
-    console.warn(
-      `[${new Date().toISOString()}] Missing detailed metrics after first extraction (${missing.length}/${EXPECTED_DETAILED_KEYS.length}): ${missing.join(', ')}. Retrying section extraction.`
-    );
-
-    await page.waitForTimeout(2000);
-
-    const maintenanceRetry = await extractMaintenanceMetrics(page);
-    for (const metric of maintenanceRetry) {
-      upsertMetric(selected, metric);
-    }
-
-    const heatingRetry = await extractHeatingCircuitMetrics(page);
-    for (const metric of heatingRetry) {
-      upsertMetric(selected, metric);
-    }
-
-    missing = missingDetailedKeys(selected);
-    if (missing.length > 0) {
-      console.warn(
-        `[${new Date().toISOString()}] Detailed metrics still missing after retry (${missing.length}/${EXPECTED_DETAILED_KEYS.length}): ${missing.join(', ')}.`
-      );
-    }
   }
 
   await browser.close();

@@ -53,16 +53,6 @@ function buildDiscoveryConfig(metric) {
   if (lname.includes('temp')) payload.device_class = 'temperature';
   if (lname.includes('pressure')) payload.device_class = 'pressure';
 
-  if (metric.key === 'sync_last_success_at') {
-    payload.device_class = 'timestamp';
-    payload.entity_category = 'diagnostic';
-  }
-
-  if (metric.key === 'sync_changed_metric_count') {
-    payload.entity_category = 'diagnostic';
-    payload.icon = 'mdi:counter';
-  }
-
   return { discoveryTopic, payload, stateTopic };
 }
 

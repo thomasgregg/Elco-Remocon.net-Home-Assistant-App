@@ -39,8 +39,8 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 
 | Option | Description |
 |---|---|
-| `dashboard_url` | ELCO dashboard URL for your gateway. Format: `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/<gateway_id>` |
-| `login_url` | ELCO login entry URL. Default: `https://www.remocon-net.remotethermo.com/R2/Account/Login` |
+| `dashboard_url` | ELCO dashboard URL for your gateway (`.../BsbPlantDashboard/Index/<gateway_id>`) |
+| `login_url` | ELCO login entry URL |
 | `login_username` | ELCO account username/email |
 | `login_password` | ELCO account password |
 | `mqtt_url` | MQTT broker URL, usually `mqtt://core-mosquitto:1883` |
@@ -61,14 +61,6 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 | `scrape_stable_passes` | `4` | Number of stable passes required |
 | `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
 | `allowed_keys_csv` | curated key list | Comma-separated allow-list for published metrics |
-
-### How to find `<gateway_id>`
-
-1. Log in to ELCO Remocon.net in your browser.
-2. Open your plant dashboard.
-3. Copy the last path segment of the URL after `/BsbPlantDashboard/Index/`.
-4. Use it in `dashboard_url`, for example:
-   - `https://www.remocon-net.remotethermo.com/BsbPlantDashboard/Index/YOUR_GATEWAY_ID`
 
 ## Published Metrics
 
@@ -93,8 +85,6 @@ Default allow-list includes:
 - `heating_circuit_714_frost_protection_setpoint`
 - `heating_circuit_720_heating_curve_slope`
 - `heating_circuit_730_summer_winter_heating_limit`
-- `sync_last_success_at`
-- `sync_changed_metric_count`
 
 ## Persistence
 
@@ -108,21 +98,3 @@ The add-on persists runtime data in `/data`:
 - If dashboard sections are temporarily unavailable, core metrics still continue to publish.
 - `No metric changes (19 tracked)` in logs is expected behavior.
 - Restart during an active scrape can produce a browser-closed error once; this is not persistent failure.
-
-## E2E Verification
-
-Run before release/push:
-
-```bash
-npm run verify:e2e
-```
-
-The command fails if either:
-- total metrics are below `VERIFY_MIN_METRICS` (default `19`)
-- any key in `VERIFY_REQUIRED_KEYS` is missing (defaults to the 19 core keys)
-
-Optional overrides:
-
-```bash
-VERIFY_MIN_METRICS=19 VERIFY_REQUIRED_KEYS="key1,key2" npm run verify:e2e
-```
