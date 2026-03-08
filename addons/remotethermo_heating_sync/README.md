@@ -93,6 +93,8 @@ Default allow-list includes:
 - `heating_circuit_714_frost_protection_setpoint`
 - `heating_circuit_720_heating_curve_slope`
 - `heating_circuit_730_summer_winter_heating_limit`
+- `sync_last_success_at`
+- `sync_changed_metric_count`
 
 ## Persistence
 

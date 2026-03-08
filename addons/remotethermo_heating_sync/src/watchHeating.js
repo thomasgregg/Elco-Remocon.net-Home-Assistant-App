@@ -33,6 +33,20 @@ function snapshotFromPayload(payload) {
   return snapshot;
 }
 
+function isSystemKey(key) {
+  return key.startsWith('sync_');
+}
+
+function stripSystemKeys(snapshot) {
+  if (!snapshot) return null;
+  const out = {};
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (isSystemKey(key)) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
 function loadLastSnapshot() {
   try {
     if (!fs.existsSync(LAST_STATE_FILE)) return null;
@@ -67,6 +81,25 @@ function getChangedKeys(current, previous) {
   return changed;
 }
 
+function buildSystemMetrics(capturedAt, changedMetricCount) {
+  return [
+    {
+      key: 'sync_last_success_at',
+      label: 'Last Successful Sync',
+      value: capturedAt,
+      numberValue: null,
+      unit: null
+    },
+    {
+      key: 'sync_changed_metric_count',
+      label: 'Changed Metrics (Last Sync)',
+      value: String(changedMetricCount),
+      numberValue: changedMetricCount,
+      unit: null
+    }
+  ];
+}
+
 async function runOnce(previousSnapshot) {
   const { payload, filePath } = await scrapeHeating();
 
@@ -76,10 +109,21 @@ async function runOnce(previousSnapshot) {
     );
   }
 
-  const currentSnapshot = snapshotFromPayload(payload);
+  const previousDomainSnapshot = stripSystemKeys(previousSnapshot);
+  const domainSnapshot = snapshotFromPayload(payload);
+  const domainChangedKeys = getChangedKeys(domainSnapshot, previousDomainSnapshot);
+
+  const systemMetrics = buildSystemMetrics(payload.capturedAt, domainChangedKeys.length);
+  const mergedPayload = {
+    ...payload,
+    metrics: [...payload.metrics, ...systemMetrics],
+    metricCount: payload.metrics.length + systemMetrics.length
+  };
+
+  const currentSnapshot = snapshotFromPayload(mergedPayload);
   const changedKeys = getChangedKeys(currentSnapshot, previousSnapshot);
   const publishKeys = HEATING_ALLOWED_KEYS.length
-    ? changedKeys.filter((key) => HEATING_ALLOWED_KEYS.includes(key))
+    ? changedKeys.filter((key) => HEATING_ALLOWED_KEYS.includes(key) || isSystemKey(key))
     : changedKeys;
 
   if (publishKeys.length === 0) {
@@ -89,7 +133,7 @@ async function runOnce(previousSnapshot) {
     return currentSnapshot;
   }
 
-  const publishResult = await publishHeatingToHomeAssistant(payload, { onlyKeys: publishKeys });
+  const publishResult = await publishHeatingToHomeAssistant(mergedPayload, { onlyKeys: publishKeys });
 
   console.log(
     `[${new Date().toISOString()}] Captured ${payload.metricCount} metrics (${filePath}), published ${publishResult.metricCount} changed metrics.`
