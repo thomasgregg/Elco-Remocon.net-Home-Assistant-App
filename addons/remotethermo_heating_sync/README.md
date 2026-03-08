@@ -108,3 +108,21 @@ The add-on persists runtime data in `/data`:
 - If dashboard sections are temporarily unavailable, core metrics still continue to publish.
 - `No metric changes (19 tracked)` in logs is expected behavior.
 - Restart during an active scrape can produce a browser-closed error once; this is not persistent failure.
+
+## E2E Verification
+
+Run before release/push:
+
+```bash
+npm run verify:e2e
+```
+
+The command fails if either:
+- total metrics are below `VERIFY_MIN_METRICS` (default `19`)
+- any key in `VERIFY_REQUIRED_KEYS` is missing (defaults to the 19 core keys)
+
+Optional overrides:
+
+```bash
+VERIFY_MIN_METRICS=19 VERIFY_REQUIRED_KEYS="key1,key2" npm run verify:e2e
+```
