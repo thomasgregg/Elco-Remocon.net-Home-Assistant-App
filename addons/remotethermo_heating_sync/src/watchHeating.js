@@ -16,6 +16,10 @@ const MAX_CONSECUTIVE_FAILURES = Number.parseInt(
   10
 );
 const MIN_ACCEPTED_METRICS = Number.parseInt(process.env.WATCH_MIN_ACCEPTED_METRICS || '8', 10);
+const INCOMPLETE_RETRY_DELAY_MS = Number.parseInt(
+  process.env.WATCH_INCOMPLETE_RETRY_DELAY_MS || '7000',
+  10
+);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -100,14 +104,28 @@ function buildSystemMetrics(capturedAt, changedMetricCount) {
   ];
 }
 
-async function runOnce(previousSnapshot) {
-  const { payload, filePath } = await scrapeHeating();
+async function scrapeWithIncompleteRetry() {
+  let first = await scrapeHeating();
+  if (first.payload.metricCount >= MIN_ACCEPTED_METRICS) return first;
 
-  if (payload.metricCount < MIN_ACCEPTED_METRICS) {
-    throw new Error(
-      `Incomplete scrape (${payload.metricCount} metrics, minimum ${MIN_ACCEPTED_METRICS}). Keeping previous state and retrying.`
-    );
-  }
+  const firstKeys = (first.payload.metrics || []).map((m) => m.key).join(', ');
+  console.warn(
+    `[${new Date().toISOString()}] Incomplete scrape (${first.payload.metricCount} metrics). Keys: ${firstKeys || 'none'}. Retrying once in ${INCOMPLETE_RETRY_DELAY_MS}ms.`
+  );
+
+  await sleep(INCOMPLETE_RETRY_DELAY_MS);
+
+  const second = await scrapeHeating();
+  if (second.payload.metricCount >= MIN_ACCEPTED_METRICS) return second;
+
+  const secondKeys = (second.payload.metrics || []).map((m) => m.key).join(', ');
+  throw new Error(
+    `Incomplete scrape persisted (${first.payload.metricCount} -> ${second.payload.metricCount} metrics, minimum ${MIN_ACCEPTED_METRICS}). Latest keys: ${secondKeys || 'none'}. Keeping previous state and retrying.`
+  );
+}
+
+async function runOnce(previousSnapshot) {
+  const { payload, filePath } = await scrapeWithIncompleteRetry();
 
   const previousDomainSnapshot = stripSystemKeys(previousSnapshot);
   const domainSnapshot = snapshotFromPayload(payload);
