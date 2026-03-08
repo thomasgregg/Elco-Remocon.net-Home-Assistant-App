@@ -15,7 +15,6 @@ export SCRAPE_POLL_DELAY_MS="$(bashio::config 'scrape_poll_delay_ms')"
 
 export WATCH_INTERVAL_MS="$(bashio::config 'watch_interval_ms')"
 export WATCH_ERROR_BACKOFF_MS="$(bashio::config 'watch_error_backoff_ms')"
-export WATCH_MIN_ACCEPTED_METRICS="$(bashio::config 'watch_min_accepted_metrics')"
 
 export MQTT_URL="$(bashio::config 'mqtt_url')"
 export MQTT_USERNAME="$(bashio::config 'mqtt_username')"
@@ -26,12 +25,6 @@ export MQTT_STATE_TOPIC="$(bashio::config 'mqtt_state_topic')"
 export HA_DEVICE_NAME="$(bashio::config 'ha_device_name')"
 export HA_DEVICE_ID="$(bashio::config 'ha_device_id')"
 export HEATING_ALLOWED_KEYS="$(bashio::config 'allowed_keys_csv')"
-
-if bashio::config.true 'publish_all_metrics'; then
-  export HEATING_PUBLISH_ALL_METRICS="1"
-else
-  export HEATING_PUBLISH_ALL_METRICS="0"
-fi
 
 export HEATING_STORAGE_STATE_PATH="/data/playwright/.auth/remotethermo.json"
 if [[ -x /usr/bin/chromium-browser ]]; then
@@ -44,7 +37,6 @@ echo "Starting RemoteThermo watcher"
 echo "Dashboard: ${HEATING_DASHBOARD_URL}"
 echo "MQTT: ${MQTT_URL}"
 echo "State path: ${HEATING_STORAGE_STATE_PATH}"
-echo "Publish all metrics: ${HEATING_PUBLISH_ALL_METRICS}"
 
 mkdir -p /data/playwright/.auth
 

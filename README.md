@@ -57,8 +57,6 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 | `ha_device_id` | `elco_remocon_heating` | Unique ID/device prefix |
 | `watch_interval_ms` | `300000` | Poll interval |
 | `watch_error_backoff_ms` | `60000` | Retry delay on failure |
-| `watch_min_accepted_metrics` | `19` | Reject scrapes below this metric count and retry |
-| `publish_all_metrics` | `true` | Publish all parsed dashboard label/value pairs (raw_* metrics) |
 | `scrape_max_wait_ms` | `90000` | Max wait for dynamic dashboard data |
 | `scrape_stable_passes` | `4` | Number of stable passes required |
 | `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
