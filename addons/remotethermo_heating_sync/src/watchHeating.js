@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   HEATING_ALLOWED_KEYS,
+  HEATING_PUBLISH_ALL_METRICS,
   OUTPUT_DIR,
   WATCH_ERROR_BACKOFF_MS,
   WATCH_INTERVAL_MS,
@@ -15,7 +16,7 @@ const MAX_CONSECUTIVE_FAILURES = Number.parseInt(
   process.env.WATCH_MAX_CONSECUTIVE_FAILURES || '15',
   10
 );
-const MIN_ACCEPTED_METRICS = Number.parseInt(process.env.WATCH_MIN_ACCEPTED_METRICS || '8', 10);
+const MIN_ACCEPTED_METRICS = Number.parseInt(process.env.WATCH_MIN_ACCEPTED_METRICS || '19', 10);
 const INCOMPLETE_RETRY_DELAY_MS = Number.parseInt(
   process.env.WATCH_INCOMPLETE_RETRY_DELAY_MS || '7000',
   10
@@ -140,9 +141,11 @@ async function runOnce(previousSnapshot) {
 
   const currentSnapshot = snapshotFromPayload(mergedPayload);
   const changedKeys = getChangedKeys(currentSnapshot, previousSnapshot);
-  const publishKeys = HEATING_ALLOWED_KEYS.length
-    ? changedKeys.filter((key) => HEATING_ALLOWED_KEYS.includes(key) || isSystemKey(key))
-    : changedKeys;
+  const publishKeys = HEATING_PUBLISH_ALL_METRICS
+    ? changedKeys
+    : HEATING_ALLOWED_KEYS.length
+      ? changedKeys.filter((key) => HEATING_ALLOWED_KEYS.includes(key) || isSystemKey(key))
+      : changedKeys;
 
   if (publishKeys.length === 0) {
     console.log(

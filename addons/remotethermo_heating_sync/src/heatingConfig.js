@@ -49,6 +49,8 @@ export const HEATING_ALLOWED_KEYS = String(process.env.HEATING_ALLOWED_KEYS || '
   .map((x) => x.trim())
   .filter(Boolean);
 
+export const HEATING_PUBLISH_ALL_METRICS = process.env.HEATING_PUBLISH_ALL_METRICS === '1';
+
 export function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
