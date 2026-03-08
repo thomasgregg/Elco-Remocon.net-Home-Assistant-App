@@ -1198,6 +1198,21 @@ async function scrapeHeating() {
   let vmData = vmHotWater;
   let { rawMetrics, selected } = buildSelectedMetrics(snapshot, vmData);
 
+  // Fallback: if we only got top header metrics, switch to R2 PlantDashboard URL and re-snapshot.
+  if (selected.length <= 3 && gatewayId) {
+    const r2DashboardUrl = `https://www.remocon-net.remotethermo.com/R2/Plant/Index/${gatewayId}?navMenuItem=PlantDashboard&breadcrumbPath=PlantFromSearch`;
+    try {
+      await page.goto(r2DashboardUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForTimeout(2500);
+      await forceOpenHotWater(page);
+      vmData = (await extractHotWaterFromViewModel(page)) || vmData;
+      snapshot = await waitForStableData(page);
+      ({ rawMetrics, selected } = buildSelectedMetrics(snapshot, vmData));
+    } catch {
+      // keep original snapshot
+    }
+  }
+
   // Auto-recovery: if hot-water values are missing/default, click Refresh and retry.
   for (let attempt = 0; attempt < 3 && !hotWaterLooksValid(selected); attempt += 1) {
     const refreshed = await clickRefreshInFrames(page);
