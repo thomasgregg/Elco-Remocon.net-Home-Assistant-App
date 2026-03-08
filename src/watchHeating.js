@@ -15,6 +15,7 @@ const MAX_CONSECUTIVE_FAILURES = Number.parseInt(
   process.env.WATCH_MAX_CONSECUTIVE_FAILURES || '15',
   10
 );
+const MIN_ACCEPTED_METRICS = Number.parseInt(process.env.WATCH_MIN_ACCEPTED_METRICS || '8', 10);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,6 +69,13 @@ function getChangedKeys(current, previous) {
 
 async function runOnce(previousSnapshot) {
   const { payload, filePath } = await scrapeHeating();
+
+  if (payload.metricCount < MIN_ACCEPTED_METRICS) {
+    throw new Error(
+      `Incomplete scrape (${payload.metricCount} metrics, minimum ${MIN_ACCEPTED_METRICS}). Keeping previous state and retrying.`
+    );
+  }
+
   const currentSnapshot = snapshotFromPayload(payload);
   const changedKeys = getChangedKeys(currentSnapshot, previousSnapshot);
   const publishKeys = HEATING_ALLOWED_KEYS.length
