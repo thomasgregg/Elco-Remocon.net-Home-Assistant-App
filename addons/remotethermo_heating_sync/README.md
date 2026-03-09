@@ -88,6 +88,15 @@ Default allow-list includes:
 - `heating_circuit_720_heating_curve_slope`
 - `heating_circuit_730_summer_winter_heating_limit`
 
+Additionally, the app publishes diagnostic sync entities:
+
+- `sync_last_run_at`
+- `sync_last_change_at`
+- `sync_tracked_metrics_count`
+- `sync_published_changed_metrics_count`
+- `sync_last_summary`
+- `sync_last_output_file`
+
 ## Persistence
 
 The add-on persists runtime data in `/data`:

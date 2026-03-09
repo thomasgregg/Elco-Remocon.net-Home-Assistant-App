@@ -28,21 +28,25 @@ function snapshotFromPayload(payload) {
   return snapshot;
 }
 
-function loadLastSnapshot() {
+function loadLastState() {
   try {
-    if (!fs.existsSync(LAST_STATE_FILE)) return null;
+    if (!fs.existsSync(LAST_STATE_FILE)) return { values: null, lastChangeAt: null };
     const raw = fs.readFileSync(LAST_STATE_FILE, 'utf8');
     const parsed = JSON.parse(raw);
-    return parsed?.values && typeof parsed.values === 'object' ? parsed.values : null;
+    return {
+      values: parsed?.values && typeof parsed.values === 'object' ? parsed.values : null,
+      lastChangeAt: typeof parsed?.lastChangeAt === 'string' ? parsed.lastChangeAt : null
+    };
   } catch {
-    return null;
+    return { values: null, lastChangeAt: null };
   }
 }
 
-function saveSnapshot(values) {
+function saveState(values, lastChangeAt) {
   ensureDir(OUTPUT_DIR);
   const payload = {
     updatedAt: new Date().toISOString(),
+    lastChangeAt: lastChangeAt || null,
     values
   };
   fs.writeFileSync(LAST_STATE_FILE, `${JSON.stringify(payload, null, 2)}\n`);
@@ -62,7 +66,77 @@ function getChangedKeys(current, previous) {
   return changed;
 }
 
-async function runOnce(previousSnapshot) {
+function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, filePath }) {
+  const summary = `Captured ${trackedCount} metrics, published ${changedCount} changed metrics.`;
+
+  const metrics = [
+    {
+      key: 'sync_last_run_at',
+      label: 'Sync Last Run At',
+      value: nowIso,
+      numberValue: null,
+      unit: null
+    },
+    {
+      key: 'sync_tracked_metrics_count',
+      label: 'Sync Tracked Metrics Count',
+      value: trackedCount,
+      numberValue: trackedCount,
+      unit: null
+    },
+    {
+      key: 'sync_published_changed_metrics_count',
+      label: 'Sync Published Changed Metrics Count',
+      value: changedCount,
+      numberValue: changedCount,
+      unit: null
+    },
+    {
+      key: 'sync_last_summary',
+      label: 'Sync Last Summary',
+      value: summary,
+      numberValue: null,
+      unit: null
+    }
+  ];
+
+  if (lastChangeAt) {
+    metrics.push({
+      key: 'sync_last_change_at',
+      label: 'Sync Last Change At',
+      value: lastChangeAt,
+      numberValue: null,
+      unit: null
+    });
+  }
+
+  if (filePath) {
+    metrics.push({
+      key: 'sync_last_output_file',
+      label: 'Sync Last Output File',
+      value: filePath,
+      numberValue: null,
+      unit: null
+    });
+  }
+
+  return metrics;
+}
+
+async function publishSyncStatus({ nowIso, lastChangeAt, trackedCount, changedCount, filePath }) {
+  const metrics = buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, filePath });
+  await publishHeatingToHomeAssistant(
+    {
+      capturedAt: nowIso,
+      url: 'watchHeating',
+      metrics,
+      metricCount: metrics.length
+    },
+    { publishDiscovery: true }
+  );
+}
+
+async function runOnce(previousSnapshot, previousLastChangeAt) {
   const { payload, filePath } = await scrapeHeating();
   const currentSnapshot = snapshotFromPayload(payload);
   const changedKeys = getChangedKeys(currentSnapshot, previousSnapshot);
@@ -70,20 +144,23 @@ async function runOnce(previousSnapshot) {
     ? changedKeys.filter((key) => HEATING_ALLOWED_KEYS.includes(key))
     : changedKeys;
 
-  if (publishKeys.length === 0) {
+  const nowIso = new Date().toISOString();
+  const changedCount = publishKeys.length;
+  const trackedCount = Object.keys(currentSnapshot).length;
+  const lastChangeAt = changedCount > 0 ? nowIso : previousLastChangeAt;
+
+  if (publishKeys.length > 0) {
+    const publishResult = await publishHeatingToHomeAssistant(payload, { onlyKeys: publishKeys });
     console.log(
-      `[${new Date().toISOString()}] No metric changes (${Object.keys(currentSnapshot).length} tracked).`
+      `[${nowIso}] Captured ${payload.metricCount} metrics (${filePath}), published ${publishResult.metricCount} changed metrics.`
     );
-    return currentSnapshot;
+  } else {
+    console.log(`[${nowIso}] No metric changes (${trackedCount} tracked).`);
   }
 
-  const publishResult = await publishHeatingToHomeAssistant(payload, { onlyKeys: publishKeys });
+  await publishSyncStatus({ nowIso, lastChangeAt, trackedCount, changedCount, filePath });
 
-  console.log(
-    `[${new Date().toISOString()}] Captured ${payload.metricCount} metrics (${filePath}), published ${publishResult.metricCount} changed metrics.`
-  );
-
-  return currentSnapshot;
+  return { snapshot: currentSnapshot, lastChangeAt };
 }
 
 async function main() {
@@ -91,12 +168,16 @@ async function main() {
     `[${new Date().toISOString()}] Heating watch started. Interval ${WATCH_INTERVAL_MS}ms, error backoff ${WATCH_ERROR_BACKOFF_MS}ms.`
   );
 
-  let snapshot = loadLastSnapshot();
+  const state = loadLastState();
+  let snapshot = state.values;
+  let lastChangeAt = state.lastChangeAt;
 
   while (true) {
     try {
-      snapshot = await runOnce(snapshot);
-      saveSnapshot(snapshot);
+      const result = await runOnce(snapshot, lastChangeAt);
+      snapshot = result.snapshot;
+      lastChangeAt = result.lastChangeAt;
+      saveState(snapshot, lastChangeAt);
       await sleep(WATCH_INTERVAL_MS);
     } catch (error) {
       console.error(`[${new Date().toISOString()}] Watch iteration failed:`, error);

@@ -52,6 +52,8 @@ function buildDiscoveryConfig(metric) {
   const lname = metric.label.toLowerCase();
   if (lname.includes('temp')) payload.device_class = 'temperature';
   if (lname.includes('pressure')) payload.device_class = 'pressure';
+  if (metric.key.startsWith('sync_')) payload.entity_category = 'diagnostic';
+  if (metric.key.startsWith('sync_') && metric.key.endsWith('_at')) payload.device_class = 'timestamp';
 
   return { discoveryTopic, payload, stateTopic };
 }
