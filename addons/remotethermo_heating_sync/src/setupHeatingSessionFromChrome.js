@@ -3,6 +3,8 @@ import { chromium } from 'playwright';
 import {
   AUTH_DIR,
   HEATING_DASHBOARD_URL,
+  HEATING_NAVIGATION_TIMEOUT_MS,
+  HEATING_POST_GOTO_SETTLE_MS,
   HEATING_STORAGE_STATE_PATH,
   ensureDir
 } from './heatingConfig.js';
@@ -21,8 +23,11 @@ async function main() {
   const context = contexts[0];
   const page = context.pages()[0] ?? (await context.newPage());
 
-  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2000);
+  await page.goto(HEATING_DASHBOARD_URL, {
+    waitUntil: 'domcontentloaded',
+    timeout: HEATING_NAVIGATION_TIMEOUT_MS
+  });
+  await page.waitForTimeout(Math.max(2000, HEATING_POST_GOTO_SETTLE_MS));
 
   const state = await context.storageState();
   fs.writeFileSync(HEATING_STORAGE_STATE_PATH, `${JSON.stringify(state, null, 2)}\n`);

@@ -5,6 +5,7 @@ import {
   AUTH_DIR,
   HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_LOGIN_URL,
+  HEATING_NAVIGATION_TIMEOUT_MS,
   HEATING_STORAGE_STATE_PATH,
   ensureDir
 } from './heatingConfig.js';
@@ -25,8 +26,13 @@ async function main() {
 
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
+  page.setDefaultNavigationTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
+  page.setDefaultTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
 
-  await page.goto(HEATING_LOGIN_URL, { waitUntil: 'domcontentloaded' });
+  await page.goto(HEATING_LOGIN_URL, {
+    waitUntil: 'domcontentloaded',
+    timeout: HEATING_NAVIGATION_TIMEOUT_MS
+  });
 
   console.log('\nComplete login in the opened browser window.');
   console.log('Wait until the heating dashboard shows all values, then press Enter to save session.\n');

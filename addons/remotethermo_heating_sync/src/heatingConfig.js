@@ -24,6 +24,14 @@ export const HEATING_BROWSER_EXECUTABLE_PATH = process.env.HEATING_BROWSER_EXECU
 export const SCRAPE_MAX_WAIT_MS = Number.parseInt(process.env.SCRAPE_MAX_WAIT_MS || '90000', 10);
 export const SCRAPE_STABLE_PASSES = Number.parseInt(process.env.SCRAPE_STABLE_PASSES || '4', 10);
 export const SCRAPE_POLL_DELAY_MS = Number.parseInt(process.env.SCRAPE_POLL_DELAY_MS || '2000', 10);
+export const HEATING_NAVIGATION_TIMEOUT_MS = Number.parseInt(
+  process.env.HEATING_NAVIGATION_TIMEOUT_MS || '60000',
+  10
+);
+export const HEATING_POST_GOTO_SETTLE_MS = Number.parseInt(
+  process.env.HEATING_POST_GOTO_SETTLE_MS || '2500',
+  10
+);
 
 export const HEATING_INCLUDE_REGEX = process.env.HEATING_INCLUDE_REGEX || '';
 export const HEATING_EXCLUDE_REGEX = process.env.HEATING_EXCLUDE_REGEX || '';

@@ -5,6 +5,8 @@ import {
   HEATING_DASHBOARD_URL,
   HEATING_LOGIN_PASSWORD,
   HEATING_LOGIN_URL,
+  HEATING_NAVIGATION_TIMEOUT_MS,
+  HEATING_POST_GOTO_SETTLE_MS,
   HEATING_LOGIN_USERNAME,
   HEATING_STORAGE_STATE_PATH,
   ensureDir
@@ -71,10 +73,15 @@ async function setupHeatingLoginWithCredentials() {
   const browser = await chromium.launch(launchOptions);
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
+  page.setDefaultNavigationTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
+  page.setDefaultTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
 
   try {
-    await page.goto(HEATING_LOGIN_URL, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1200);
+    await page.goto(HEATING_LOGIN_URL, {
+      waitUntil: 'domcontentloaded',
+      timeout: HEATING_NAVIGATION_TIMEOUT_MS
+    });
+    await page.waitForTimeout(Math.max(1200, HEATING_POST_GOTO_SETTLE_MS));
 
     const s = loginSelectors();
     const userOk = await fillFirst(page, s.username, HEATING_LOGIN_USERNAME);
@@ -90,8 +97,11 @@ async function setupHeatingLoginWithCredentials() {
 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3500);
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(3000);
+    await page.goto(HEATING_DASHBOARD_URL, {
+      waitUntil: 'domcontentloaded',
+      timeout: HEATING_NAVIGATION_TIMEOUT_MS
+    });
+    await page.waitForTimeout(Math.max(3000, HEATING_POST_GOTO_SETTLE_MS));
 
     const finalUrl = page.url();
     if (/login|signin|account/i.test(finalUrl) && !finalUrl.includes('/BsbPlantDashboard/')) {

@@ -1,5 +1,5 @@
 name: "Elco-Remocon.net-Home-Assistant-App"
-version: "1.0.4"
+version: "1.0.5"
 slug: "remotethermo_heating_sync"
 description: "Read ELCO Remocon.net heat pump telemetry and publish Home Assistant MQTT discovery/state entities."
 url: "https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App"
@@ -23,6 +23,8 @@ options:
   scrape_max_wait_ms: 90000
   scrape_stable_passes: 4
   scrape_poll_delay_ms: 2000
+  navigation_timeout_ms: 60000
+  post_goto_settle_ms: 2500
   watch_interval_ms: 300000
   watch_error_backoff_ms: 60000
   mqtt_url: "mqtt://core-mosquitto:1883"
@@ -41,6 +43,8 @@ schema:
   scrape_max_wait_ms: int
   scrape_stable_passes: int
   scrape_poll_delay_ms: int
+  navigation_timeout_ms: int
+  post_goto_settle_ms: int
   watch_interval_ms: int
   watch_error_backoff_ms: int
   mqtt_url: str

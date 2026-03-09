@@ -7,6 +7,8 @@ import {
   HEATING_BROWSER_EXECUTABLE_PATH,
   HEATING_DASHBOARD_URL,
   HEATING_STORAGE_STATE_PATH,
+  HEATING_NAVIGATION_TIMEOUT_MS,
+  HEATING_POST_GOTO_SETTLE_MS,
   OUTPUT_DIR,
   SCRAPE_MAX_WAIT_MS,
   SCRAPE_POLL_DELAY_MS,
@@ -279,8 +281,7 @@ async function refreshAuthStateFromChromeCdp() {
 
     const context = contexts[0];
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await gotoDashboard(page);
 
     ensureDir(AUTH_DIR);
     const state = await context.storageState();
@@ -307,6 +308,23 @@ function launchOptions(headless) {
     options.executablePath = HEATING_BROWSER_EXECUTABLE_PATH;
   }
   return options;
+}
+
+async function safeClose(resource) {
+  if (!resource) return;
+  try {
+    await resource.close();
+  } catch {}
+}
+
+async function gotoDashboard(page, url = HEATING_DASHBOARD_URL) {
+  page.setDefaultNavigationTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
+  page.setDefaultTimeout(HEATING_NAVIGATION_TIMEOUT_MS);
+  await page.goto(url, {
+    waitUntil: 'domcontentloaded',
+    timeout: HEATING_NAVIGATION_TIMEOUT_MS
+  });
+  await page.waitForTimeout(HEATING_POST_GOTO_SETTLE_MS);
 }
 
 function loadLastGoodHotWater() {
@@ -1045,8 +1063,7 @@ async function tryScrapeFromLiveChromeCdp() {
     const context = browser.contexts()[0] || (await browser.newContext());
     const page = context.pages()[0] || (await context.newPage());
 
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2500);
+    await gotoDashboard(page);
     await forceOpenHotWater(page);
 
     const vmHotWater = await extractHotWaterFromViewModel(page);
@@ -1058,6 +1075,8 @@ async function tryScrapeFromLiveChromeCdp() {
     }
   } catch {
     // best effort fallback
+  } finally {
+    await safeClose(browser);
   }
 
   return null;
@@ -1129,18 +1148,23 @@ async function scrapeHeating() {
     }
   }
 
-  let browser = await chromium.launch(launchOptions(true));
+  let browser = null;
+  let context = null;
+  let page = null;
 
-  let context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
-  let page = await context.newPage();
-
-  await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2500);
+  try {
+    browser = await chromium.launch(launchOptions(true));
+    context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
+    page = await context.newPage();
+    await gotoDashboard(page);
 
   let pageUrl = page.url();
   if (/login|signin|account/i.test(pageUrl) && !pageUrl.includes('/BsbPlantDashboard/')) {
-    await context.close();
-    await browser.close();
+    await safeClose(context);
+    await safeClose(browser);
+    context = null;
+    browser = null;
+    page = null;
 
     if (hasLoginCredentials()) {
       await setupHeatingLoginWithCredentials();
@@ -1156,11 +1180,10 @@ async function scrapeHeating() {
     browser = retryBrowser;
     context = await browser.newContext({ storageState: HEATING_STORAGE_STATE_PATH });
     page = await context.newPage();
-    await page.goto(HEATING_DASHBOARD_URL, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2500);
+    await gotoDashboard(page);
     pageUrl = page.url();
     if (/login|signin|account/i.test(pageUrl) && !pageUrl.includes('/BsbPlantDashboard/')) {
-      await browser.close();
+      await safeClose(browser);
       throw new Error(
         `Session still unauthenticated after CDP refresh. Current URL: ${pageUrl}. ` +
           `Ensure Chrome is running on ${process.env.CHROME_CDP_URL || 'http://127.0.0.1:9222'} and logged in.`
@@ -1283,8 +1306,6 @@ async function scrapeHeating() {
     upsertMetric(selected, metric);
   }
 
-  await browser.close();
-
   if (DEBUG_RAW) {
     ensureDir(OUTPUT_DIR);
     fs.writeFileSync(
@@ -1315,6 +1336,10 @@ async function scrapeHeating() {
   fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`);
 
   return { payload, filePath };
+  } finally {
+    await safeClose(context);
+    await safeClose(browser);
+  }
 }
 
 export { scrapeHeating };

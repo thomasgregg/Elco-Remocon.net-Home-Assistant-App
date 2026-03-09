@@ -24,7 +24,7 @@ The add-on logs into ELCO Remocon.net, reads heating values from your plant dash
 3. Add repository URL:
    - `https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App`
 4. Install:
-   - `ELCO Remocon.net Heating MQTT Sync`
+   - `Elco-Remocon.net-Home-Assistant-App`
 
 ## Home Assistant Example
 
@@ -60,6 +60,8 @@ It combines status indicators, hot water temperatures, maintenance diagnostics, 
 | `scrape_max_wait_ms` | `90000` | Max wait for dynamic dashboard data |
 | `scrape_stable_passes` | `4` | Number of stable passes required |
 | `scrape_poll_delay_ms` | `2000` | Poll delay while waiting for stable data |
+| `navigation_timeout_ms` | `60000` | Navigation timeout used for ELCO page loads/login redirects |
+| `post_goto_settle_ms` | `2500` | Extra settle wait after each dashboard/login navigation |
 | `allowed_keys_csv` | curated key list | Comma-separated allow-list for published metrics |
 
 ## Published Metrics

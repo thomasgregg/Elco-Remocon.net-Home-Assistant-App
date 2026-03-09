@@ -12,6 +12,8 @@ export HEATING_LOGIN_PASSWORD="$(bashio::config 'login_password')"
 export SCRAPE_MAX_WAIT_MS="$(bashio::config 'scrape_max_wait_ms')"
 export SCRAPE_STABLE_PASSES="$(bashio::config 'scrape_stable_passes')"
 export SCRAPE_POLL_DELAY_MS="$(bashio::config 'scrape_poll_delay_ms')"
+export HEATING_NAVIGATION_TIMEOUT_MS="$(bashio::config 'navigation_timeout_ms')"
+export HEATING_POST_GOTO_SETTLE_MS="$(bashio::config 'post_goto_settle_ms')"
 
 export WATCH_INTERVAL_MS="$(bashio::config 'watch_interval_ms')"
 export WATCH_ERROR_BACKOFF_MS="$(bashio::config 'watch_error_backoff_ms')"
