@@ -66,8 +66,9 @@ function getChangedKeys(current, previous) {
   return changed;
 }
 
-function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, filePath }) {
-  const summary = `Captured ${trackedCount} metrics, published ${changedCount} changed metrics.`;
+function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, changedKeys, filePath }) {
+  const changedKeysText = changedKeys.length ? changedKeys.join(', ') : 'none';
+  const summary = `Captured ${trackedCount} metrics, published ${changedCount} changed metrics. Changed keys: ${changedKeysText}`;
 
   const metrics = [
     {
@@ -123,8 +124,8 @@ function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, fi
   return metrics;
 }
 
-async function publishSyncStatus({ nowIso, lastChangeAt, trackedCount, changedCount, filePath }) {
-  const metrics = buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, filePath });
+async function publishSyncStatus({ nowIso, lastChangeAt, trackedCount, changedCount, changedKeys, filePath }) {
+  const metrics = buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, changedKeys, filePath });
   await publishHeatingToHomeAssistant(
     {
       capturedAt: nowIso,
@@ -151,14 +152,22 @@ async function runOnce(previousSnapshot, previousLastChangeAt) {
 
   if (publishKeys.length > 0) {
     const publishResult = await publishHeatingToHomeAssistant(payload, { onlyKeys: publishKeys });
+    const changedKeysText = publishKeys.join(', ');
     console.log(
-      `[${nowIso}] Captured ${payload.metricCount} metrics (${filePath}), published ${publishResult.metricCount} changed metrics.`
+      `[${nowIso}] Captured ${payload.metricCount} metrics (${filePath}), published ${publishResult.metricCount} changed metrics. Changed keys: ${changedKeysText}`
     );
   } else {
-    console.log(`[${nowIso}] No metric changes (${trackedCount} tracked).`);
+    console.log(`[${nowIso}] No metric changes (${trackedCount} tracked). Changed keys: none.`);
   }
 
-  await publishSyncStatus({ nowIso, lastChangeAt, trackedCount, changedCount, filePath });
+  await publishSyncStatus({
+    nowIso,
+    lastChangeAt,
+    trackedCount,
+    changedCount,
+    changedKeys: publishKeys,
+    filePath
+  });
 
   return { snapshot: currentSnapshot, lastChangeAt };
 }
