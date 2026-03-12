@@ -109,3 +109,6 @@ The add-on persists runtime data in `/data`:
 - If dashboard sections are temporarily unavailable, core metrics still continue to publish.
 - `No metric changes (19 tracked)` in logs is expected behavior.
 - Restart during an active scrape can produce a browser-closed error once; this is not persistent failure.
+
+
+`sync_last_summary` state stays short for Home Assistant compatibility. Full changed-key details are published as attributes on that entity.

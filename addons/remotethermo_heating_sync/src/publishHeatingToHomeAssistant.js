@@ -55,6 +55,10 @@ function buildDiscoveryConfig(metric) {
   if (metric.key.startsWith('sync_')) payload.entity_category = 'diagnostic';
   if (metric.key.startsWith('sync_') && metric.key.endsWith('_at')) payload.device_class = 'timestamp';
 
+  if (metric.attributes && typeof metric.attributes === 'object') {
+    payload.json_attributes_topic = `${stateTopic}/attributes`;
+  }
+
   return { discoveryTopic, payload, stateTopic };
 }
 
@@ -122,6 +126,10 @@ async function publishHeatingToHomeAssistant(metricsPayload, options = {}) {
           ? metric.numberValue
           : metric.value;
     await publish(client, stateTopic, metricValue, { retain: true, qos: 1 });
+
+    if (metric.attributes && typeof metric.attributes === 'object') {
+      await publish(client, `${stateTopic}/attributes`, metric.attributes, { retain: true, qos: 1 });
+    }
   }
 
   client.end(true);

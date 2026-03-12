@@ -68,7 +68,7 @@ function getChangedKeys(current, previous) {
 
 function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, changedKeys, filePath }) {
   const changedKeysText = changedKeys.length ? changedKeys.join(', ') : 'none';
-  const summary = `Captured ${trackedCount} metrics, published ${changedCount} changed metrics. Changed keys: ${changedKeysText}`;
+  const summary = `Captured ${trackedCount} metrics, published ${changedCount} changed metrics.`;
 
   const metrics = [
     {
@@ -97,7 +97,16 @@ function buildSyncMetrics({ nowIso, lastChangeAt, trackedCount, changedCount, ch
       label: 'Sync Last Summary',
       value: summary,
       numberValue: null,
-      unit: null
+      unit: null,
+      attributes: {
+        changed_keys: changedKeys,
+        changed_keys_text: changedKeysText,
+        changed_count: changedCount,
+        tracked_count: trackedCount,
+        last_run_at: nowIso,
+        last_change_at: lastChangeAt || null,
+        last_output_file: filePath || null
+      }
     }
   ];
 

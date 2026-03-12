@@ -1,5 +1,5 @@
 name: "Elco-Remocon.net-Home-Assistant-App"
-version: "1.0.7"
+version: "1.0.8"
 slug: "remotethermo_heating_sync"
 description: "Read ELCO Remocon.net heat pump telemetry and publish Home Assistant MQTT discovery/state entities."
 url: "https://github.com/thomasgregg/Elco-Remocon.net-Home-Assistant-App"
